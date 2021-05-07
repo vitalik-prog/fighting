@@ -17,7 +17,9 @@ export function createFighters(fighters) {
 function createFighter(fighter, selectFighter) {
   const fighterElement = createElement({ tagName: 'div', className: 'fighters___fighter' });
   const imageElement = createImage(fighter);
-  const onClick = (event) => selectFighter(event, fighter._id);
+  const onClick = async (event) => {
+    selectFighter(event, fighter._id);
+  }
 
   fighterElement.append(imageElement);
   fighterElement.addEventListener('click', onClick, false);

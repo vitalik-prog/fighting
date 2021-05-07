@@ -1,5 +1,6 @@
 import { createElement } from '../helpers/domHelper';
 import { createFighterImage } from './fighterPreview';
+import { fight } from './fight';
 
 export function renderArena(selectedFighters) {
   const root = document.getElementById('root');
@@ -7,6 +8,8 @@ export function renderArena(selectedFighters) {
 
   root.innerHTML = '';
   root.append(arena);
+  const [firstFighter, secondFighter] = selectedFighters
+  fight(firstFighter, secondFighter)
 
   // todo:
   // - start the fight
@@ -27,6 +30,7 @@ function createHealthIndicators(leftFighter, rightFighter) {
   const versusSign = createElement({ tagName: 'div', className: 'arena___versus-sign' });
   const leftFighterIndicator = createHealthIndicator(leftFighter, 'left');
   const rightFighterIndicator = createHealthIndicator(rightFighter, 'right');
+/*  const fightLog = createElement({ tagName: 'textarea', className: '' });*/
 
   healthIndicators.append(leftFighterIndicator, versusSign, rightFighterIndicator);
   return healthIndicators;

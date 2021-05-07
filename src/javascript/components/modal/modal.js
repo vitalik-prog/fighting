@@ -1,6 +1,8 @@
 import { createElement } from '../../helpers/domHelper';
+import App from '../../app';
 
 export function showModal({ title, bodyElement, onClose = () => {} }) {
+
   const root = getModalContainer();
   const modal = createModal({ title, bodyElement, onClose }); 
   
@@ -33,6 +35,9 @@ function createHeader(title, onClose) {
   const close = () => {
     hideModal();
     onClose();
+    const doc = document.getElementsByClassName("arena___root")[0];
+    doc.remove();//очищаем документ перед следующим боем
+    new App();//генерируем следующий бой
   }
   closeButton.addEventListener('click', close);
   headerElement.append(titleElement, closeButton);
