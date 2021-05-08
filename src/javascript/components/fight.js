@@ -1,5 +1,4 @@
 import { controls } from '../../constants/controls';
-import { showWinnerModal } from './modal/winner';
 
 export async function fight(firstFighter, secondFighter) {
 
@@ -127,13 +126,11 @@ export async function fight(firstFighter, secondFighter) {
       if (firstFighter.variableHealth < 0) {
         document.removeEventListener('keydown', keyDownListener);
         document.removeEventListener('keyup', keyUpListener);
-        clearInterval(timerId);
         resolve(secondFighter);
       }
       if (secondFighter.variableHealth < 0) {
         document.removeEventListener('keydown', keyDownListener);
         document.removeEventListener('keyup', keyUpListener);
-        clearInterval(timerId);
         resolve(firstFighter);
       }
     }
@@ -147,7 +144,6 @@ export async function fight(firstFighter, secondFighter) {
     document.addEventListener('keyup', keyUpListener);
 
   })
-    .then(fighter => showWinnerModal(fighter));
 }
 
 export function getDamage(attacker, defender) {
