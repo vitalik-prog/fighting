@@ -7,21 +7,57 @@ export async function fight(firstFighter, secondFighter) {
   secondFighter.variableHealth = secondFighter.health;
   firstFighter.isActiveCrit = true;
   secondFighter.isActiveCrit = true;
+  const fightLogElement = document.querySelector('.arena___fight-log');
+  fightLogElement.setAttribute('readonly', '');
 
   return new Promise((resolve) => {//промис который возвращает победителя
     let combinationFirstFighter = new Set();
     let combinationSecondFighter = new Set();
     let timerId;
+    let attacker;
+    let defender;
+
+    //--------------------логика для критов ----------------------------------------
+    function criticalKickTimer(ms, fighter) { //функция которая позволяе бить крит
+      timerId = setTimeout(() => {
+        fighter.isActiveCrit = true;
+        clearTimeout(timerId);
+      }, ms);
+    }
+
+    function criticalKickPower(fighter1, fighter2) {
+      fighter2.variableHealth = fighter2.variableHealth - fighter1.attack * 2;//проводим крит
+      const oldText = fightLogElement.value;
+      const newText = fighter1.name + ' hit CRIT: ' + fighter1.attack * 2 + ' pts!!!';
+      fightLogElement.value = oldText + '\n' + newText;
+      fightLogElement.scrollTop = fightLogElement.scrollHeight;
+    }
+
+    //-----------логика для обычных ударов ------------------------
+
+    const checkingFighter = (fighter1, fighter2) => {
+      if (!fighter1.blockPower) {  //если не в блоке первый боец, то он атакует
+        attacker = fighter1;
+        const hitPower = getHitPower(attacker);
+        let damage
+        if (fighter2.blockPower) { //есть ли у второго бойца блок, если да то урон уменьшается
+          damage = hitPower - fighter2.blockPower;
+          if (damage < 0) damage = 0; // если сила блока больше силы удара, то урон ноль
+          fighter2.variableHealth = fighter2.variableHealth - damage;
+          fighter2.blockPower = 0;
+        } else {
+          damage = hitPower;
+          fighter2.variableHealth = fighter2.variableHealth - damage;
+        }
+        const oldText = fightLogElement.value;
+        const newText = fighter1.name + ' amazing hit ' + (Math.round(damage * 100) / 100) + ' pts!';
+        fightLogElement.value = oldText + '\n' + newText;
+        fightLogElement.scrollTop = fightLogElement.scrollHeight;
+        return fighter2.variableHealth;
+      }
+    };
 
     function keyDownListener(event) {//главный листенер нажатия клавиш
-
-      //--------------------логика для критов ----------------------------------------
-      function criticalKick(ms, fighter) { //функция которая позволяе бить крит
-        timerId = setInterval(() => {
-          fighter.isActiveCrit = true;
-          clearInterval(timerId);
-        }, ms);
-      }
 
       //-----------логика для критов для первого бойца--------------------------------
       if (event.code === controls.PlayerOneCriticalHitCombination[0] ||
@@ -31,13 +67,14 @@ export async function fight(firstFighter, secondFighter) {
       }
 
       if (combinationFirstFighter.size === 3) { //проверям нажаты ли все 3 клавиши для критического удара
-        criticalKick(4000, firstFighter);
         if (firstFighter.isActiveCrit) {//проверяем прошло ли время для очередного крита
-          secondFighter.variableHealth = secondFighter.variableHealth - firstFighter.attack * 2;//проводим крит
+          criticalKickTimer(10000, firstFighter);
+          attacker = firstFighter;
+          defender = secondFighter;
+          criticalKickPower(attacker, defender);
         }
         firstFighter.isActiveCrit = false; //запрещаем крит пока не пройдет заданное время
       }
-      console.log('secondFighter.isActiveCrit' + firstFighter.isActiveCrit);
       //-----------логика для критов для второго бойца--------------------------------
       if (event.code === controls.PlayerTwoCriticalHitCombination[0] ||
         event.code === controls.PlayerTwoCriticalHitCombination[1] ||
@@ -45,35 +82,29 @@ export async function fight(firstFighter, secondFighter) {
         combinationSecondFighter.add(event.code);
       }
       if (combinationSecondFighter.size === 3) { //проверям нажаты ли все 3 клавиши для критического удара
-        criticalKick(4000, secondFighter);
         if (secondFighter.isActiveCrit) {//проверяем прошло ли время для очередного крита
-          firstFighter.variableHealth = firstFighter.variableHealth - secondFighter.attack * 2;//проводим крит
+          criticalKickTimer(10000, secondFighter);
+          attacker = secondFighter;
+          defender = firstFighter;
+          criticalKickPower(attacker, defender);
         }
         secondFighter.isActiveCrit = false; //запрещаем крит пока не пройдет заданное время
       }
-      console.log("secondFighter.isActiveCrit" + secondFighter.isActiveCrit);
-      //-----------логика для обычных ударов ------------------------
-      let attacker;
-      let defender;
-
-      const checkingFighter = (fighter1, fighter2) => {
-        if (!fighter1.blockPower) {  //если не в блоке первый боец, то он атакует
-          attacker = fighter1;
-          if (fighter2.blockPower) { //есть ли у второго бойца блок, если да то урон уменьшается
-            let damage = fighter2.blockPower - getHitPower(attacker);
-            if (damage > 0) damage = 0; // если сила блока больше силы удара, то урон ноль
-            fighter2.variableHealth = fighter2.variableHealth + damage;
-            fighter2.blockPower = 0;
-          } else {
-            fighter2.variableHealth = fighter2.variableHealth - getHitPower(attacker);
-          }
-          return fighter2.variableHealth;
-        }
-      };
+      console.log("firstFighter.isActiveCrit:  " + firstFighter.isActiveCrit)
+      console.log("secondFighter.isActiveCrit:  " + secondFighter.isActiveCrit)
+      //-----------логика обычных ударов и защиты первого бойца--------------------------------
+      if (event.code === controls.PlayerOneAttack) {
+        checkingFighter(firstFighter, secondFighter);
+      }
 
       if (event.code === controls.PlayerOneBlock) {
         defender = firstFighter;
         firstFighter.blockPower = getBlockPower(defender);
+      }
+
+      //-----------логика обычных ударов и защиты второго бойца--------------------------------
+      if (event.code === controls.PlayerTwoAttack) {
+        checkingFighter(secondFighter, firstFighter);
       }
 
       if (event.code === controls.PlayerTwoBlock) {
@@ -81,13 +112,7 @@ export async function fight(firstFighter, secondFighter) {
         secondFighter.blockPower = getBlockPower(defender);
       }
 
-      if (event.code === controls.PlayerOneAttack) {
-        checkingFighter(firstFighter, secondFighter);
-      }
-
-      if (event.code === controls.PlayerTwoAttack) {
-        checkingFighter(secondFighter, firstFighter);
-      }
+      //-----------------------------------------------------------------------------------------
 
       if (firstFighter.blockPower && secondFighter.blockPower) {  //проверка не в блоке ли оба бойца, если да снимаем блок обоим
         firstFighter.blockPower = 0;
