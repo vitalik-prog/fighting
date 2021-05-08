@@ -8,7 +8,7 @@ export function createFighterPreview(fighter, position) {
     className: `fighter-preview___root ${positionClassName}`
   });
   if (fighter) {
-    const { name, source, health } = fighter;
+    const { name, source, health, attack, defense } = fighter;
     const attributes = {
       src: source,
       title: name,
@@ -20,10 +20,14 @@ export function createFighterPreview(fighter, position) {
       attributes
     });
     const fighterName = createElement({ tagName: 'span', className: 'arena___fighter-name' });
-    fighterName.innerText = name;
     const fighterHealth = createElement({ tagName: 'span', className: 'arena___fighter-name' });
+    const fighterAttack = createElement({ tagName: 'span', className: 'arena___fighter-name' });
+    const fighterDefense = createElement({ tagName: 'span', className: 'arena___fighter-name' });
+    fighterName.innerText = name;
     fighterHealth.innerText = 'health:' + health;
-    fighterElement.append(fighterName,imgElement,fighterHealth);
+    fighterAttack.innerText = 'attack:' + attack;
+    fighterDefense.innerText = 'defense:' + defense;
+    fighterElement.append(fighterName,imgElement,fighterHealth,fighterAttack,fighterDefense);
   }
   // todo: show fighter info (image, name, health, etc.)
 

@@ -12,12 +12,13 @@ export async function fight(firstFighter, secondFighter) {
   return new Promise((resolve) => {//промис который возвращает победителя
     let combinationFirstFighter = new Set();
     let combinationSecondFighter = new Set();
-    let timerId;
+    let timerIdFirst;
+    let timerIdSecond;
     let attacker;
     let defender;
 
     //--------------------логика для критов ----------------------------------------
-    function criticalKickTimer(ms, fighter) { //функция которая позволяе бить крит
+    function criticalKickTimer(ms, fighter, timerId) { //функция которая позволяе бить крит
       timerId = setTimeout(() => {
         fighter.isActiveCrit = true;
         clearTimeout(timerId);
@@ -67,12 +68,12 @@ export async function fight(firstFighter, secondFighter) {
 
       if (combinationFirstFighter.size === 3) { //проверям нажаты ли все 3 клавиши для критического удара
         if (firstFighter.isActiveCrit) {//проверяем прошло ли время для очередного крита
-          criticalKickTimer(10000, firstFighter);
+          criticalKickTimer(10000,firstFighter,timerIdFirst)
           attacker = firstFighter;
           defender = secondFighter;
           criticalKickPower(attacker, defender);
+          firstFighter.isActiveCrit = false; //запрещаем крит пока не пройдет заданное время
         }
-        firstFighter.isActiveCrit = false; //запрещаем крит пока не пройдет заданное время
       }
       //-----------логика для критов для второго бойца--------------------------------
       if (event.code === controls.PlayerTwoCriticalHitCombination[0] ||
@@ -82,12 +83,12 @@ export async function fight(firstFighter, secondFighter) {
       }
       if (combinationSecondFighter.size === 3) { //проверям нажаты ли все 3 клавиши для критического удара
         if (secondFighter.isActiveCrit) {//проверяем прошло ли время для очередного крита
-          criticalKickTimer(10000, secondFighter);
+          criticalKickTimer(10000,secondFighter,timerIdSecond)
           attacker = secondFighter;
           defender = firstFighter;
           criticalKickPower(attacker, defender);
+          secondFighter.isActiveCrit = false; //запрещаем крит пока не пройдет заданное время
         }
-        secondFighter.isActiveCrit = false; //запрещаем крит пока не пройдет заданное время
       }
       console.log("firstFighter.isActiveCrit:  " + firstFighter.isActiveCrit)
       console.log("secondFighter.isActiveCrit:  " + secondFighter.isActiveCrit)
