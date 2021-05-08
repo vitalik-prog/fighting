@@ -1,13 +1,6 @@
 import { controls } from '../../constants/controls';
 import { showWinnerModal } from './modal/winner';
 
-/*export async function fight(firstFighter, secondFighter) {
-  return new Promise((resolve) => {
-    // resolve the promise with the winner when fight is over
-  });
-}*/
-
-
 export async function fight(firstFighter, secondFighter) {
 
   firstFighter.variableHealth = firstFighter.health;
